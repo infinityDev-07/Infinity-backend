@@ -1,11 +1,63 @@
-{
-  "name": "infinity-backend",
-  "version": "1.0.0",
-  "main": "server.js",
-  "scripts": { "start": "node server.js" },
-  "dependencies": {
-    "express": "^4.18.2",
-    "cors": "^2.8.5",
-    "nodemailer": "^6.9.7"
-  }
+const express = require('express');
+const cors = require('cors');
+const nodemailer = require('nodemailer');
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// ===== CONFIG =====
+const EMAIL_USER = 'asifmohammed86154@gmail.com';
+const EMAIL_PASS = 'PASTE_YOUR_16_CHAR_APP_PASSWORD_HERE'; // Gmail App Password
+const TELEGRAM_TOKEN = 'PASTE_YOUR_BOT_TOKEN_HERE'; // From BotFather
+const TELEGRAM_CHAT_ID = 'PASTE_YOUR_CHAT_ID_HERE'; // Your chat id
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: { user: EMAIL_USER, pass: EMAIL_PASS }
+});
+
+// Send Telegram function
+async function sendTelegram(name, email, message) {
+  try {
+    const text = `🎮 NEW LEAD - INFINITY GAMES\n\n👤 Name: ${name}\n📧 Email: ${email}\n💬 Message: ${message}\n\n⏰ Time: ${new Date().toLocaleString('en-IN')}`;
+    await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: text })
+    });
+  } catch (e) { console.log('Telegram error', e.message); }
 }
+
+app.post('/send', async (req, res) => {
+  const { name, email, message } = req.body;
+  try {
+    // 1. Send Email to you
+    await transporter.sendMail({
+      from: `"INFINITY Portfolio" <${EMAIL_USER}>`,
+      to: EMAIL_USER,
+      subject: `🎮 New Message from ${name}`,
+      html: `<div style="font-family:Arial;background:#070a07;color:#fff;padding:20px;border-radius:12px;border:1px solid #22ff66"><h2 style="color:#22ff66">NEW LEAD</h2><p><b>Name:</b> ${name}</p><p><b>Email:</b> ${email}</p><p><b>Message:</b> ${message}</p></div>`
+    });
+
+    // 2. Auto-reply to user
+    await transporter.sendMail({
+      from: `"Mohammed Asif" <${EMAIL_USER}>`,
+      to: email,
+      subject: 'Thanks for contacting INFINITY GAMES 🎮',
+      html: `<p>Hi ${name}, got your message! Will reply within 2 hours - Asif</p>`
+    });
+
+    // 3. Telegram Notification
+    await sendTelegram(name, email, message);
+
+    res.json({ success: true });
+  } catch (err) { 
+    console.log(err);
+    res.status(500).json({ success: false, error: err.message }); 
+  }
+});
+
+app.get('/', (req,res)=> res.send('Backend Running ✅ Gmail + Telegram Ready'));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, ()=> console.log('Running on '+PORT));
