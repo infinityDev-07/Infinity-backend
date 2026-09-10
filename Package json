@@ -8,9 +8,9 @@ app.use(express.json());
 
 // ===== CONFIG =====
 const EMAIL_USER = 'asifmohammed86154@gmail.com';
-const EMAIL_PASS = 'PASTE_YOUR_16_CHAR_APP_PASSWORD_HERE'; // Gmail App Password
-const TELEGRAM_TOKEN = 'PASTE_YOUR_BOT_TOKEN_HERE'; // From BotFather
-const TELEGRAM_CHAT_ID = 'PASTE_YOUR_CHAT_ID_HERE'; // Your chat id
+const EMAIL_PASS = 'asif.infinity.08'; // Gmail App Password
+const TELEGRAM_TOKEN = '8936795346:AAFURS-lV36xBy07HrAZMNotWC_IDlxijKw'; // From BotFather
+const TELEGRAM_CHAT_ID = 'infinity_asif_bot'; // Your chat id
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
